@@ -27,14 +27,16 @@ HOMEWORK_STATUSES = {
 
 logger = logging.getLogger(__name__)
 handler = RotatingFileHandler(
-    'my_logger.log', 
-    maxBytes=50000000, 
+    'my_logger.log',
+    maxBytes=50000000,
     backupCount=5
     )
 logger.addHandler(handler)
 
 
 def send_message(bot, message):
+    """Отправка сообщения ботом."""
+
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
     except Exception as error:
@@ -42,15 +44,17 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
+    """Отправка запроса API."""
+
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     error_message = 'Возникли проблемы с запросом API'
     try:
         logging.info('Запрос отправлен')
         homework_status = requests.get(
-            ENDPOINT, 
-            headers=HEADERS, 
-            params=params
+                                    ENDPOINT,
+                                    headers=HEADERS,
+                                    params=params
         )
     except ValueError as error:
         logging.error(f'Не был получен ответ. {error}')
@@ -63,6 +67,8 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
+    """Проверка запроса."""
+
     if type(response) != dict:
         raise TypeError('Ошибка. Ответ не явялется словарем!')
     try:
@@ -79,6 +85,8 @@ def check_response(response):
 
 
 def parse_status(homework):
+    """Проверка статуса домашней работы."""
+
     if 'homework_name' not in homework:
         raise KeyError('homework_name отсутствует в homework')
     homework_name = homework['homework_name']
@@ -91,6 +99,8 @@ def parse_status(homework):
 
 
 def check_tokens():
+    """Проверка доступности переменных окружения."""
+
     tokens = {
         'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
@@ -104,6 +114,7 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
+
     if not check_tokens():
         logger.critical('Критическая ошбика в переменных')
         return None

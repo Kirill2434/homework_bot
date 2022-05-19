@@ -38,8 +38,8 @@ def send_message(bot, message):
     try:
         logging.info('Сообщение отправлено')
         bot.send_message(TELEGRAM_CHAT_ID, message)
-    except Exception:
-        raise TelegramError('Сообщение не было отправлено')
+    except Exception as error:
+        raise TelegramError(f'Сообщение не было отправлено {error}')
 
 
 def get_api_answer(current_timestamp):
@@ -98,7 +98,7 @@ def main():
     """Основная логика работы бота."""
     if not check_tokens():
         logger.critical('Критическая ошбика в переменных')
-        return sys.exit()
+        return sys.exit('Ошибка в переменных окружения')
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     empty_response = None
@@ -116,7 +116,11 @@ def main():
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
+            error_send_messeg = 'Ошибка отправки сообщения'
+            if error == TelegramError(error_send_messeg):
+                logger.error(error_send_messeg)
             logger.error(message)
+
         finally:
             time.sleep(RETRY_TIME)
 
